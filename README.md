@@ -113,12 +113,15 @@ O relatório é organizado em 4 páginas, cada uma respondendo a uma pergunta de
 | **Cancelamentos e Impacto Financeiro** | Prejuízo por país/produto, nota de qualidade de dados |
 
 O relatório possui 4 páginas cobrindo a visão executiva, segmentação RFM, comportamento temporal e cancelamentos, conforme os painéis ilustrados abaixo:
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/d931d35b-c318-4324-bc8f-c48c8e92ce5d" alt="Visão Executiva" width="48%">
+  <img src="https://github.com/user-attachments/assets/ead5a780-a7b8-430a-86f0-aab856cd8f4a" alt="Segmentação RFM" width="48%">
+</p>
 
-* **1. Visão Executiva:** ![Visão Executiva](dashboard/imagens/visao_executiva.png)
-* **2. Segmentação RFM:** ![Segmentação RFM](dashboard/imagens/segmentacao_rfm.png)
-* **3. Comportamento Temporal:** ![Comportamento Temporal](dashboard/imagens/comportamento_temporal.png)
-* **4. Cancelamentos:** ![Cancelamentos](dashboard/imagens/cancelamentos.png)
-
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/5e97e642-b53f-47e7-b072-3c89bd8a8b4b" alt="Comportamento Temporal" width="48%">
+  <img src="https://github.com/user-attachments/assets/8d7c76a8-5ecc-476e-89e4-26d4657fbc5f" alt="Cancelamentos" width="48%">
+</p>
 ---
 
 ## 🚀 Estrutura do repositório
