@@ -112,6 +112,13 @@ O relatório é organizado em 4 páginas, cada uma respondendo a uma pergunta de
 | **Comportamento Temporal** | Sazonalidade, dia da semana, matriz de coorte de retenção (absoluta e percentual) |
 | **Cancelamentos e Impacto Financeiro** | Prejuízo por país/produto, nota de qualidade de dados |
 
+O relatório possui 4 páginas cobrindo a visão executiva, segmentação RFM, comportamento temporal e cancelamentos, conforme os painéis ilustrados abaixo:
+
+* **1. Visão Executiva:** ![Visão Executiva](dashboard/imagens/visao_executiva.png)
+* **2. Segmentação RFM:** ![Segmentação RFM](dashboard/imagens/segmentacao_rfm.png)
+* **3. Comportamento Temporal:** ![Comportamento Temporal](dashboard/imagens/comportamento_temporal.png)
+* **4. Cancelamentos:** ![Cancelamentos](dashboard/imagens/cancelamentos.png)
+
 ---
 
 ## 🚀 Estrutura do repositório
