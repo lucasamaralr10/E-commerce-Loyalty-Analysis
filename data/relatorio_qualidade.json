@@ -1,0 +1,9 @@
+{
+  "total_linhas_originais": 536350,
+  "quantidade_invalida_removida": 0,
+  "nulos_id_cliente_removidos": 55,
+  "duplicatas_removidas": 5200,
+  "divergencia_flag_cancelamento": 0,
+  "outliers_quantidade_sinalizados": 26820,
+  "total_linhas_finais": 531095
+}

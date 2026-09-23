@@ -1,0 +1,19 @@
+{
+  "name": "E-commerce Dark Theme",
+  "dataColors": [
+    "#4FC3F7",
+    "#29B6F6",
+    "#26C6DA",
+    "#FFB74D",
+    "#EF5350",
+    "#78909C",
+    "#66BB6A",
+    "#AB47BC"
+  ],
+  "background": "#1E1E2E",
+  "foreground": "#FFFFFF",
+  "tableAccent": "#4FC3F7",
+  "good": "#66BB6A",
+  "neutral": "#FFB74D",
+  "bad": "#EF5350"
+}

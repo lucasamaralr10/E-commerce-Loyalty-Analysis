@@ -1,0 +1,17 @@
+# Arquivos de dados pesados (Bloqueia em qualquer pasta)
+*.csv
+*.db
+*.sqlite
+
+# Arquivos do Power BI (Bloqueia o arquivo atual e futuros)
+*.pbix
+
+# Pastas temporárias do Python e Jupyter
+*.ipynb_checkpoints/
+__pycache__/
+.pytest_cache/
+
+# Arquivos de sistema
+.vscode/
+.DS_Store
+Thumbs.db
