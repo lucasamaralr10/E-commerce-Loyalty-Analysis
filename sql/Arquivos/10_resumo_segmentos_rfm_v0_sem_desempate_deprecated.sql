@@ -1,3 +1,15 @@
+-- =====================================================================
+-- DESCONTINUADO (deprecated) — NÃO USAR
+-- Versão antiga do resumo RFM, mantida só para histórico.
+-- Problema: os NTILE(5) não têm critério de desempate (ORDER BY apenas
+-- por recencia_dias / frequencia / monetario). Clientes empatados caem
+-- em quintis escolhidos arbitrariamente pelo SQLite, e o resultado pode
+-- mudar entre execuções/versões.
+-- O número antigo 'Campeões = 22% dos clientes / 63% do faturamento'
+-- provavelmente veio desta versão; a versão corrigida resulta em
+-- 20,7% / 60,7% (achado nº 3 da auditoria).
+-- Versão oficial: sql/10_resumo_segmentos_rfm.sql (desempate por id_cliente).
+-- =====================================================================
 WITH base_cliente AS (
     SELECT
         v.id_cliente,
