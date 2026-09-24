@@ -1,3 +1,16 @@
+DROP TABLE IF EXISTS dim_clientes;
+
+CREATE TABLE dim_clientes (
+    id_cliente INTEGER PRIMARY KEY,
+    pais_cliente TEXT
+);
+
+INSERT INTO dim_clientes (id_cliente, pais_cliente)
+SELECT id_cliente, pais_cliente
+FROM tb_raw_vendas
+WHERE id_cliente IS NOT NULL
+GROUP BY id_cliente, pais_cliente;
+
 DROP TABLE IF EXISTS dim_produtos;
 
 CREATE TABLE dim_produtos (

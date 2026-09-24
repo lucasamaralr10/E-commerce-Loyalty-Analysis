@@ -7,10 +7,10 @@ import json
 
 # Define a estrutura de pastas usando o caminho do script
 PASTA_SCRIPT = Path(os.getcwd()) if 'os' in locals() else Path(".").resolve()
-RAIZ_PROJETO = PASTA_SCRIPT.parent if PASTA_SCRIPT.name == "scripts" else PASTA_SCRIPT
+RAIZ_PROJETO = PASTA_SCRIPT.parent if PASTA_SCRIPT.name in ("scripts", "notebooks") else PASTA_SCRIPT
 
 csv_path = RAIZ_PROJETO / "data" / "Transacao_de_vendas.csv"
-db_path = RAIZ_PROJETO / "queries" / "database.db"
+db_path = RAIZ_PROJETO / "sql" / "database.db"
 relatorio_path = RAIZ_PROJETO / "data" / "relatorio_qualidade.json"
 
 db_path.parent.mkdir(parents=True, exist_ok=True)
