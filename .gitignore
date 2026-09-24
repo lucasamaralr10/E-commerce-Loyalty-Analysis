@@ -5,6 +5,7 @@
 
 # Arquivos do Power BI (Bloqueia o arquivo atual e futuros)
 *.pbix
+!dashboard/*.pbix
 
 # Pastas temporárias do Python e Jupyter
 *.ipynb_checkpoints/

@@ -114,25 +114,32 @@ O relatório é organizado em 4 páginas, cada uma respondendo a uma pergunta de
 
 O relatório possui 4 páginas cobrindo a visão executiva, segmentação RFM, comportamento temporal e cancelamentos, conforme os painéis ilustrados abaixo:
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/d931d35b-c318-4324-bc8f-c48c8e92ce5d" alt="Visão Executiva" width="48%">
-  <img src="https://github.com/user-attachments/assets/ead5a780-a7b8-430a-86f0-aab856cd8f4a" alt="Segmentação RFM" width="48%">
+  <img src="dashboard/imagens/visao_executiva.png" alt="Visão Executiva" width="48%">
+  <img src="dashboard/imagens/segmentacao_rfm.png" alt="Segmentação RFM" width="48%">
 </p>
 
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/5e97e642-b53f-47e7-b072-3c89bd8a8b4b" alt="Comportamento Temporal" width="48%">
-  <img src="https://github.com/user-attachments/assets/8d7c76a8-5ecc-476e-89e4-26d4657fbc5f" alt="Cancelamentos" width="48%">
+  <img src="dashboard/imagens/comportamento_temporal.png" alt="Comportamento Temporal" width="48%">
+  <img src="dashboard/imagens/cancelamentos.png" alt="Cancelamentos" width="48%">
 </p>
+
 ---
 
 ## 🚀 Estrutura do repositório
 
 ```
-├── notebooks/       # Ingestão e limpeza de dados (Python)
-├── sql/             # Modelagem dimensional e queries analíticas
-│   └── archive/     # Versões anteriores mantidas para referência histórica
-├── dashboard/       # Arquivo Power BI (.pbix)
-└── data/            # Dataset bruto (não incluído — baixar do Kaggle) e relatório de qualidade
+├── notebooks/                        # Ingestão e limpeza de dados (Python)
+├── sql/                              # Modelagem dimensional (00_) e queries analíticas (01_ a 11_)
+│   ├── 10_resumo_segmentos_rfm.sql   # Resumo RFM: clientes e faturamento por segmento
+│   ├── 11_curva_pareto_clientes.sql  # Curva de Pareto: concentração de receita por cliente
+│   ├── investigacoes/                # Queries de auditoria (outliers, terças-feiras, bug de preço, calibragem IQR)
+│   └── Arquivos/                     # Versões descontinuadas, mantidas para referência histórica
+├── dashboard/                        # Relatório Power BI (.pbix)
+│   └── imagens/                      # Prints das 4 páginas do relatório
+└── data/                             # Dataset bruto (não incluído — baixar do Kaggle) e relatório de qualidade
 ```
+
+O arquivo .pbix está em `dashboard/` e abre com os dados já carregados (modo Importação). A atualização exige recriar o banco localmente via `notebooks/ingestao.py` e o driver ODBC do SQLite.
 
 **Pré-requisitos:** Python 3.x com `pandas`; SQLite; Power BI Desktop com driver ODBC SQLite.
 
