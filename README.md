@@ -2,7 +2,7 @@
 
 Pipeline de dados ponta a ponta — **Ingestão (Python) → Modelagem Dimensional (SQL) → Business Intelligence (Power BI)** — construído sobre uma base real de transações de e-commerce/atacado, com foco em responder perguntas de negócio sobre retenção, valor de cliente e cancelamento.
 
-> 💡 **O diferencial deste projeto não é só o resultado final — é o processo de auditoria dos dados.** Ao longo do desenvolvimento, identifiquei e corrigi um bug estrutural que distorcia o faturamento total em ~31%, outliers extremos que inflavam métricas de cancelamento, e uma falha de não-determinismo na segmentação de clientes. A seção [Jornada de Auditoria de Dados](#-jornada-de-auditoria-de-dados) documenta cada um desses achados.
+> 💡 **O diferencial deste projeto não é só o resultado final — é o processo de auditoria dos dados.** Ao longo do desenvolvimento, identifiquei e corrigi um bug estrutural que subestimava o faturamento total em cerca de um terço, outliers extremos que inflavam métricas de cancelamento, e uma falha de não-determinismo na segmentação de clientes. A seção [Jornada de Auditoria de Dados](#-jornada-de-auditoria-de-dados) documenta cada um desses achados.
 
 ---
 
@@ -21,6 +21,10 @@ Pipeline de dados ponta a ponta — **Ingestão (Python) → Modelagem Dimension
 Dataset público **"An Online Shop Business"** ([Kaggle](https://www.kaggle.com/datasets/gabrielramos87/an-online-shop-business)), com 536.350 transações de uma varejista/atacadista do Reino Unido, cobrindo dez/2018 a dez/2019 (o último mês é parcial — dados até 09/12).
 
 Os valores monetários originais estão em **libras esterlinas (GBP)**. Para leitura em português, os valores são apresentados também em **Reais (BRL)**, convertidos à cotação de **R$ 6,9277**, parametrizada explicitamente no modelo do Power BI para rastreabilidade (não é um valor "hardcoded" nas colunas de origem).
+
+A moeda de referência do projeto é a **libra (£)**; os valores em R$ são apenas uma conversão de leitura. A conversão usa uma cotação fixa de R$ 6,9277 (não a da época), aplicada a dados de 2019.
+
+**Definição de faturamento:** todos os totais deste projeto são **faturamento bruto** — soma de `quantidade × preco_unitario` das vendas não canceladas: **£ 62.781.304,54**. Descontando os cancelamentos (− £ 2.646.715,27), o faturamento líquido seria £ 60.134.589,27.
 
 ---
 
@@ -61,15 +65,15 @@ Conexão direta ao SQLite via ODBC, com medidas DAX para as métricas de negóci
 
 Esta seção documenta os problemas reais encontrados durante o desenvolvimento — e por que eles importam.
 
-### 1. Bug estrutural no faturamento total (~31% de distorção)
-A primeira versão da modelagem populava `preco_unitario` na tabela de dimensão de produtos via `GROUP BY id_produto` **sem função de agregação** — um comportamento não-determinístico do SQLite que escolhe um valor arbitrário por grupo. Como o preço varia por transação (promoções, reajustes), isso inflava/distorcia o cálculo de receita.
+### 1. Bug estrutural no faturamento total (subestimação de cerca de um terço)
+A primeira versão da modelagem populava `preco_unitario` na tabela de dimensão de produtos via `GROUP BY id_produto` **sem função de agregação** — um comportamento não-determinístico do SQLite que escolhe um valor arbitrário por grupo. Como o preço varia por transação (promoções, reajustes), isso distorcia o cálculo de receita.
 
 **Correção:** o atributo `preco_unitario` foi movido para a tabela fato (granularidade correta — preço é um atributo da transação, não do produto).
 
-**Impacto:** o faturamento total saiu de um valor incorreto de ~R$ 42 Mi (não confiável) para o valor auditado e validado por **três métodos independentes** (soma direta, agregação mensal, agregação por dia da semana): **£ 62.781.304,54** (≈ R$ 434,93 Mi).
+**Impacto:** com o preço arbitrário, o faturamento total aparecia como **£ 41,9 Mi** — cerca de 33% (um terço) a menos na reprodução desta auditoria; o valor exato varia entre execuções por ser não-determinístico (reprodução em `sql/investigacoes/03_validacao_bug_preco.sql`). O valor auditado e validado por **três métodos independentes** (soma direta, agregação mensal, agregação por dia da semana) é **£ 62.781.304,54** (≈ R$ 434,93 Mi).
 
 ### 2. Outliers extremos de cancelamento
-Duas transações isoladas — uma de -80.995 unidades (£ 501 mil) e outra de -74.215 unidades (£ 840 mil) — distorciam a leitura de padrões típicos de cancelamento. Ambas foram identificadas, investigadas (uma delas revelou um cliente que comprou e cancelou um pedido de atacado inteiro, sem gerar receita líquida) e documentadas separadamente, em vez de simplesmente descartadas sem registro.
+Duas transações isoladas — uma de -80.995 unidades (£ 501 mil) e outra de -74.215 unidades (£ 840 mil) — distorciam a leitura de padrões típicos de cancelamento. Ambas foram identificadas, investigadas (uma delas revelou um cliente que comprou e cancelou um pedido de atacado inteiro, sem gerar receita líquida) e documentadas separadamente, em vez de simplesmente descartadas sem registro. No outro caso (cliente 16446), o cancelamento das 80.995 unidades foi registrado a £ 6,19 por unidade, metade dos £ 12,38 da compra original — por isso estorna só £ 501 mil de uma compra de £ 1,00 Mi. A anomalia vem da própria fonte de dados e não foi corrigida, apenas documentada.
 
 ### 3. Segmentação RFM não-determinística
 A função `NTILE()` usada para gerar os scores de Recência/Frequência/Monetário não tinha critério de desempate — clientes com valores idênticos podiam cair em quintis diferentes dependendo da ordem física das linhas retornada pelo motor de conexão. Corrigido adicionando `id_cliente` como critério de desempate secundário, garantindo resultado estável e reprodutível.
@@ -81,15 +85,20 @@ A base de clientes distintos totaliza **4.738**, mas apenas **4.718** possuem ao
 - **Nenhuma transação registrada às terças-feiras** em todo o período — validado com uma contagem de controle isolada, e não é uma característica de amostra pequena: é ausência total, possivelmente uma particularidade operacional da fonte original.
 - **Dezembro/2019 é um mês parcial** (dados só até o dia 09) — sinalizado visualmente em todos os gráficos temporais e excluído de conclusões sobre sazonalidade/retenção nesse período.
 
+### 6. Validação cruzada com outro projeto público
+Um [notebook público independente](https://github.com/mdrakibhasanrc/Python_Portfolio/blob/main/E-commerce%20Business%20Sales%20Analysis%20.ipynb) sobre a mesma base chegou aos mesmos números de limpeza: **5.200 duplicados**, **55 registros sem cliente** e **522.601 linhas válidas** (vendas não canceladas). A diferença está nos outliers de quantidade: lá eles foram **removidos** por IQR, o que elimina boa parte dos pedidos de atacado e explica totais de receita menores; aqui eles foram **sinalizados** (`flag_outlier_quantidade`), preservando a receita. Os dois projetos concordam que **domingo** é o dia de maior faturamento e **quarta-feira**, o menor.
+
 ---
 
 ## 💡 Principais Insights de Negócio
 
-### Concentração de valor: a regra 22/63
-A segmentação RFM (Recência, Frequência, Monetário, com *scoring* por quintil, não por thresholds arbitrários) revela que **22% dos clientes ("Campeões") respondem por 63% de todo o faturamento**. O segmento "Em Risco (Alto Valor)" — clientes que já gastaram muito, mas pararam de comprar — representa o alvo mais acionável para campanhas de reativação.
+### Concentração de valor: 20% dos clientes geram 73% da receita
+A segmentação RFM (Recência, Frequência, Monetário, com *scoring* por quintil, não por thresholds arbitrários) revela que os **"Campeões" — 20,7% dos clientes — respondem por 60,7% do faturamento** (`sql/10_resumo_segmentos_rfm.sql`). Como esse segmento já é filtrado por valor monetário, o teste direto de concentração é a curva de Pareto, que ordena os clientes **apenas por faturamento** (`sql/11_curva_pareto_clientes.sql`): **os top 20% dos clientes geram 72,9% da receita**, e só o top 1% (47 clientes) gera 29,8%.
+
+O Princípio de Pareto (80/20) é uma heurística empírica, não uma lei: os números mostram uma concentração forte, coerente com o princípio, mas não um 80/20. Isso também é um risco — a receita depende de poucos clientes, e a perda de algumas contas grandes teria impacto desproporcional. O segmento "Em Risco (Alto Valor)" — clientes que já gastaram muito, mas pararam de comprar — representa o alvo mais acionável para campanhas de reativação.
 
 ### O gargalo da primeira compra
-A análise de coorte de retenção mostra que apenas **35% dos clientes do coorte de dez/2018 ainda estavam ativos 6 meses depois**. Isso reforça que o maior ponto de perda de receita não é a aquisição, e sim a falta de conversão para uma segunda compra.
+Entre os clientes novos (coortes de jan a mai/2019), só **~18% voltam a comprar no mês seguinte** e **~24% compram no 6º mês** (`sql/12_retencao_coortes_novos.sql`). O coorte de dez/2018 (35%) não entra nessa conta porque reúne a base de clientes antigos (ver Limitações). A métrica conta quem comprou naquele mês, por isso o 6º mês pode superar o 1º. Uma hipótese não testada é a alta temporada de jul a nov/2019. Conclusão: o principal desafio não é atrair clientes, e sim converter a primeira compra em recorrência.
 
 ### Padrões temporais
 - **Domingo** é o dia de maior faturamento; **quarta-feira**, o menor (nenhuma terça-feira registrada em todo o período)
@@ -97,7 +106,17 @@ A análise de coorte de retenção mostra que apenas **35% dos clientes do coort
 - O Reino Unido domina o volume absoluto, mas **Holanda, Austrália, Japão e Suécia** lideram em ticket médio por pedido (com volume mínimo de pedidos aplicado para evitar viés de amostra pequena)
 
 ### Cancelamentos
-Taxa de cancelamento de ~16,4% dos pedidos, concentrada no Reino Unido — mas com achados pontuais relevantes (ver seção de auditoria) que, uma vez isolados, revelam um padrão de cancelamento mais estável e menos distorcido do que os números brutos sugeririam.
+~14,6% dos pedidos são cancelados, mas eles representam só ~4,2% do faturamento bruto. Os cancelamentos se concentram no Reino Unido — mas com achados pontuais relevantes (ver seção de auditoria) que, uma vez isolados, revelam um padrão de cancelamento mais estável e menos distorcido do que os números brutos sugeririam.
+
+---
+
+## ⚠️ Limitações
+
+- **Faturamento, não lucro:** a base não tem custo dos produtos, então as análises tratam de faturamento, não de margem ou lucro.
+- **Faturamento bruto:** O faturamento oficial é bruto (vendas não canceladas). Os cancelamentos equivalem a ~4,2% desse valor (£ 2,65 Mi). RFM e Pareto também usam valores brutos, então incluem £ 1,84 Mi dos dois pedidos de atacado cancelados (clientes 12346 e 16446), cerca de 2,9% do total. Isso foi mantido para preservar consistência com o total oficial.
+- **Empates no RFM:** os empates nos quintis (`NTILE`) são resolvidos por `id_cliente`. O resultado é reprodutível, mas a escolha entre clientes empatados é arbitrária.
+- **Censura na coorte:** à esquerda, o dataset começa em dez/2018, então esse coorte reúne a base de clientes antigos (quem já comprava antes aparece como "novo" nesse mês) e fica fora da manchete de retenção; à direita, dez/2019 é parcial e os coortes mais recentes têm menos meses observáveis.
+- **Nomes de produto em inglês:** mantidos em inglês para preservar a correspondência exata com a fonte original e facilitar a rastreabilidade.
 
 ---
 
@@ -129,9 +148,10 @@ O relatório possui 4 páginas cobrindo a visão executiva, segmentação RFM, c
 
 ```
 ├── notebooks/                        # Ingestão e limpeza de dados (Python)
-├── sql/                              # Modelagem dimensional (00_) e queries analíticas (01_ a 11_)
+├── sql/                              # Modelagem dimensional (00_) e queries analíticas (01_ a 12_)
 │   ├── 10_resumo_segmentos_rfm.sql   # Resumo RFM: clientes e faturamento por segmento
 │   ├── 11_curva_pareto_clientes.sql  # Curva de Pareto: concentração de receita por cliente
+│   ├── 12_retencao_coortes_novos.sql # Retenção M1/M6 dos clientes novos (coortes de jan a mai/2019)
 │   ├── investigacoes/                # Queries de auditoria (outliers, terças-feiras, bug de preço, calibragem IQR)
 │   └── Arquivos/                     # Versões descontinuadas, mantidas para referência histórica
 ├── dashboard/                        # Relatório Power BI (.pbix)

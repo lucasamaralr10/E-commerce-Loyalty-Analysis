@@ -14,6 +14,18 @@ WHERE v.flag_cancelado = 1
 GROUP BY c.pais_cliente
 ORDER BY total_prejuizo_cancelamento DESC;
 
+-- TAXA DE CANCELAMENTO GERAL (todos os países, sem exclusões)
+-- Mesma definição da medida DAX "Taxa de Cancelamento":
+-- pedidos cancelados / (pedidos cancelados + pedidos válidos).
+-- Resultado na auditoria: 3.379 / 23.168 = 14,58%.
+-- Obs.: o bookmark "Sem Reino Unido" do Power BI mostra outro recorte (~16,4%).
+SELECT
+    COUNT(DISTINCT CASE WHEN flag_cancelado = 1 THEN id_transacao END) AS pedidos_cancelados,
+    COUNT(DISTINCT id_transacao)                                       AS pedidos_total,
+    ROUND(100.0 * COUNT(DISTINCT CASE WHEN flag_cancelado = 1 THEN id_transacao END)
+          / COUNT(DISTINCT id_transacao), 2)                           AS pct_pedidos_cancelados
+FROM fato_vendas;
+
 -- RASCUNHO DE CONSULTA PARA VERIFICAR SE EXISTEM REGISTROS COM QUANTIDADE NEGATIVA NA TABELA DE VENDAS
 --SELECT quantidade 
 --FROM tb_raw_vendas 
