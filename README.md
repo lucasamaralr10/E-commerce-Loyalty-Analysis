@@ -57,7 +57,7 @@ fato_vendas    (id_transacao, id_cliente, id_produto, data_transacao,
 Índices aplicados nas chaves de junção e nos filtros mais usados (`flag_cancelado`).
 
 ### 3. Business Intelligence (Power BI)
-Conexão direta ao SQLite via ODBC, com medidas DAX para as métricas de negócio e views SQL pré-agregadas (RFM, coorte, sazonalidade) consumidas diretamente — evitando duplicar lógica de negócio entre camadas.
+Conexão direta ao SQLite via ODBC, com medidas DAX para as métricas de negócio e consultas SQL nativas no Power Query (RFM, coorte, sazonalidade), com a mesma lógica das queries em `sql/` — evitando duplicar lógica de negócio entre camadas.
 
 ---
 
@@ -154,12 +154,12 @@ O relatório possui 4 páginas cobrindo a visão executiva, segmentação RFM, c
 │   ├── 12_retencao_coortes_novos.sql # Retenção M1/M6 dos clientes novos (coortes de jan a mai/2019)
 │   ├── investigacoes/                # Queries de auditoria (outliers, terças-feiras, bug de preço, calibragem IQR)
 │   └── Arquivos/                     # Versões descontinuadas, mantidas para referência histórica
-├── dashboard/                        # Relatório Power BI (.pbix)
+├── dashboard/                        # Prints do relatório Power BI (o .pbix não é versionado)
 │   └── imagens/                      # Prints das 4 páginas do relatório
 └── data/                             # Dataset bruto (não incluído — baixar do Kaggle) e relatório de qualidade
 ```
 
-O arquivo .pbix está em `dashboard/` e abre com os dados já carregados (modo Importação). A atualização exige recriar o banco localmente via `notebooks/ingestao.py` e o driver ODBC do SQLite.
+O arquivo Power BI (.pbix) não está no repositório porque depende de uma conexão ODBC local ao banco SQLite. Os prints das 4 páginas e as queries em `sql/` documentam os resultados completos. O .pbix funcional pode ser enviado mediante solicitação.
 
 **Pré-requisitos:** Python 3.x com `pandas`; SQLite; Power BI Desktop com driver ODBC SQLite.
 
