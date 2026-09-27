@@ -15,9 +15,11 @@ GROUP BY c.pais_cliente
 ORDER BY total_prejuizo_cancelamento DESC;
 
 -- TAXA DE CANCELAMENTO GERAL (todos os países, sem exclusões)
--- Mesma definição da medida DAX "Taxa de Cancelamento":
+-- Mesma fórmula da medida DAX "Taxa de Cancelamento":
 -- pedidos cancelados / (pedidos cancelados + pedidos válidos).
--- Resultado na auditoria: 3.379 / 23.168 = 14,58%.
+-- Diferença: aqui entram todos os cancelamentos (3.379 / 23.168 = 14,58%);
+-- a medida DAX exclui os 2 cancelamentos extremos (quantidade <= -10000,
+-- clientes 12346 e 16446) e mostra 3.377 / 23.166 = 14,58%. A taxa é a mesma.
 -- Obs.: o bookmark "Sem Reino Unido" do Power BI mostra outro recorte (~16,4%).
 SELECT
     COUNT(DISTINCT CASE WHEN flag_cancelado = 1 THEN id_transacao END) AS pedidos_cancelados,
