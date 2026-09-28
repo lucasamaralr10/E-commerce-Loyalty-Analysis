@@ -93,7 +93,7 @@ Um [notebook público independente](https://github.com/mdrakibhasanrc/Python_Por
 ## 💡 Principais Insights de Negócio
 
 ### Concentração de valor: 20% dos clientes geram 73% da receita
-A segmentação RFM (Recência, Frequência, Monetário, com *scoring* por quintil, não por thresholds arbitrários) revela que os **"Campeões" — 20,7% dos clientes — respondem por 60,7% do faturamento** (`sql/10_resumo_segmentos_rfm.sql`). Como esse segmento já é filtrado por valor monetário, o teste direto de concentração é a curva de Pareto, que ordena os clientes **apenas por faturamento** (`sql/11_curva_pareto_clientes.sql`): **os top 20% dos clientes geram 72,9% da receita**, e só o top 1% (47 clientes) gera 29,8%.
+A segmentação RFM (Recência, Frequência, Monetário, com *scoring* por quintil, não por thresholds arbitrários) revela que os **"Campeões" — 20,7% dos clientes — respondem por 60,7% do faturamento** (`sql/10_resumo_segmentos_rfm.sql`). Como esse segmento já é filtrado por valor monetário, o teste direto de concentração é a curva de Pareto, que ordena os clientes **apenas por faturamento** (`sql/11_curva_pareto_clientes.sql`): **os top 20% dos clientes geram 72,9% da receita**, os top 10%, 59,0%, e só o top 1% (47 clientes) gera 29,8%.
 
 O Princípio de Pareto (80/20) é uma heurística empírica, não uma lei: os números mostram uma concentração forte, coerente com o princípio, mas não um 80/20. Isso também é um risco — a receita depende de poucos clientes, e a perda de algumas contas grandes teria impacto desproporcional. O segmento "Em Risco (Alto Valor)" — clientes que já gastaram muito, mas pararam de comprar — representa o alvo mais acionável para campanhas de reativação.
 
@@ -106,14 +106,14 @@ Entre os clientes novos (coortes de jan a mai/2019), só **~18% voltam a comprar
 - O Reino Unido domina o volume absoluto, mas **Holanda, Austrália, Japão e Suécia** lideram em ticket médio por pedido (com volume mínimo de pedidos aplicado para evitar viés de amostra pequena)
 
 ### Cancelamentos
-~14,6% dos pedidos são cancelados, mas eles representam só ~4,2% do faturamento bruto. Os cancelamentos se concentram no Reino Unido — mas com achados pontuais relevantes (ver seção de auditoria) que, uma vez isolados, revelam um padrão de cancelamento mais estável e menos distorcido do que os números brutos sugeririam.
+~14,6% dos pedidos são cancelados, mas eles representam só ~4,2% do faturamento bruto (`sql/03_analise_cancelamentos_pais.sql` e `sql/13_consultas_metricas_finais.sql`). Os cancelamentos se concentram no Reino Unido — mas com achados pontuais relevantes (ver seção de auditoria) que, uma vez isolados, revelam um padrão de cancelamento mais estável e menos distorcido do que os números brutos sugeririam.
 
 ---
 
 ## ⚠️ Limitações
 
 - **Faturamento, não lucro:** a base não tem custo dos produtos, então as análises tratam de faturamento, não de margem ou lucro.
-- **Faturamento bruto:** O faturamento oficial é bruto (vendas não canceladas). Os cancelamentos equivalem a ~4,2% desse valor (£ 2,65 Mi). RFM e Pareto também usam valores brutos, então incluem £ 1,84 Mi dos dois pedidos de atacado cancelados (clientes 12346 e 16446), cerca de 2,9% do total. Isso foi mantido para preservar consistência com o total oficial.
+- **Faturamento bruto:** O faturamento oficial é bruto (vendas não canceladas). Os cancelamentos equivalem a ~4,2% desse valor (£ 2,65 Mi). RFM e Pareto também usam valores brutos, então incluem £ 1,84 Mi dos dois pedidos de atacado cancelados (clientes 12346 e 16446), cerca de 2,9% do total. Isso foi mantido para preservar consistência com o total oficial. (Consultas em `sql/13_consultas_metricas_finais.sql`.)
 - **Empates no RFM:** os empates nos quintis (`NTILE`) são resolvidos por `id_cliente`. O resultado é reprodutível, mas a escolha entre clientes empatados é arbitrária.
 - **Censura na coorte:** à esquerda, o dataset começa em dez/2018, então esse coorte reúne a base de clientes antigos (quem já comprava antes aparece como "novo" nesse mês) e fica fora da manchete de retenção; à direita, dez/2019 é parcial e os coortes mais recentes têm menos meses observáveis.
 - **Nomes de produto em inglês:** mantidos em inglês para preservar a correspondência exata com a fonte original e facilitar a rastreabilidade.
@@ -148,10 +148,11 @@ O relatório possui 4 páginas cobrindo a visão executiva, segmentação RFM, c
 
 ```
 ├── notebooks/                        # Ingestão e limpeza de dados (Python)
-├── sql/                              # Modelagem dimensional (00_) e queries analíticas (01_ a 12_)
+├── sql/                              # Modelagem dimensional (00_) e queries analíticas (01_ a 13_)
 │   ├── 10_resumo_segmentos_rfm.sql   # Resumo RFM: clientes e faturamento por segmento
 │   ├── 11_curva_pareto_clientes.sql  # Curva de Pareto: concentração de receita por cliente
 │   ├── 12_retencao_coortes_novos.sql # Retenção M1/M6 dos clientes novos (coortes de jan a mai/2019)
+│   ├── 13_consultas_metricas_finais.sql # Métricas de apoio: cancelamento vs. bruto, recorte sem Reino Unido, pedidos de atacado, validação cruzada
 │   ├── investigacoes/                # Queries de auditoria (outliers, terças-feiras, bug de preço, calibragem IQR)
 │   └── Arquivos/                     # Versões descontinuadas, mantidas para referência histórica
 ├── dashboard/                        # Prints do relatório Power BI (o .pbix não é versionado)
