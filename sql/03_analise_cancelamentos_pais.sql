@@ -1,7 +1,9 @@
 -- ANALISE CANCELAMENTOS POR PAÍS
--- Nota: exclui a transação id C581484 (-80.995 unidades, cliente 16446, produto
--- "Paper Craft Little Birdie") por ser um outlier extremo isolado que distorce
--- a leitura de padrões típicos de cancelamento. Ver nota no README sobre esse caso.
+-- Nota: o filtro quantidade > -10000 exclui os 2 cancelamentos extremos:
+-- C581484 (-80.995 unidades, cliente 16446, produto "Paper Craft Little Birdie")
+-- e C541433 (-74.215 unidades, cliente 12346). São outliers isolados (pedidos de
+-- atacado cancelados por inteiro) que distorcem a leitura de padrões típicos de
+-- cancelamento. Ver seção de auditoria no README.
 SELECT 
     c.pais_cliente,
     COUNT(DISTINCT v.id_transacao) AS total_pedidos_cancelados,
