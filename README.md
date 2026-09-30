@@ -22,6 +22,8 @@ Dataset público **"An Online Shop Business"** ([Kaggle](https://www.kaggle.com/
 
 Os valores monetários originais estão em **libras esterlinas (GBP)**. Para leitura em português, os valores são apresentados também em **Reais (BRL)**, convertidos à cotação de **R$ 6,9277**, parametrizada explicitamente no modelo do Power BI para rastreabilidade (não é um valor "hardcoded" nas colunas de origem).
 
+**Por que GBP no SQL e BRL só no Power BI:** os dados brutos e todas as queries em `sql/` permanecem em libras, a moeda original da fonte — converter na camada SQL quebraria a fidelidade ao dado bruto e misturaria uma decisão de apresentação com a lógica de negócio. A conversão para reais é feita exclusivamente no Power BI, por um parâmetro What-if (`TaxaCambioGBPparaBRL`), o que permite ajustar a taxa de câmbio sem reescrever nem re-executar nenhuma query.
+
 A moeda de referência do projeto é a **libra (£)**; os valores em R$ são apenas uma conversão de leitura. A conversão usa uma cotação fixa de R$ 6,9277 (não a da época), aplicada a dados de 2019.
 
 **Definição de faturamento:** todos os totais deste projeto são **faturamento bruto** — soma de `quantidade × preco_unitario` das vendas não canceladas: **£ 62.781.304,54**. Descontando os cancelamentos (− £ 2.646.715,27), o faturamento líquido seria £ 60.134.589,27.
